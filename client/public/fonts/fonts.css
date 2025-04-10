@@ -1,0 +1,34 @@
+@font-face {
+  font-family: 'Mazzard H';
+  src: url('MazzardH-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Mazzard M';
+  src: url('MazzardM-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Mazzard M';
+  src: url('MazzardM-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Mazzard M';
+  src: url('MazzardM-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Mazzard M';
+  src: url('MazzardM-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}

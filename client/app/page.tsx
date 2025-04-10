@@ -1,96 +1,103 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 
-interface Blog {
-  id: number;
-  title: string;
-  content: string;
-}
+import { FeaturedBlogs } from '@/components/FeaturedBlogs';
+
+const fetchBlogs = async () => {
+  const response = await fetch('http://localhost:8000/api/blogs/');
+  if (!response.ok) {
+    throw new Error('Помилка при завантаженні блогів');
+  }
+  return response.json();
+};
 
 export default function Home() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-
-  const { register, handleSubmit, reset } = useForm({
-    defaultValues: { title: '', content: '' },
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['blogs'],
+    queryFn: fetchBlogs,
   });
 
-  useEffect(() => {
-    fetch('http://localhost:8000/')
-      .then((res) => res.json())
-      .then((data) => setBlogs(data))
-      .catch((err) => console.error('Ошибка загрузки:', err));
-  }, []);
+  if (isLoading) {
+    return <div>Завантаження...</div>;
+  }
 
-  const addBlog = async (data: { title: string; content: string }) => {
-    const response = await fetch('http://localhost:8000/create/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+  if (error instanceof Error) {
+    return <div>Помилка: {error.message}</div>;
+  }
 
-    if (response.ok) {
-      const newBlog = await response.json();
-      setBlogs([...blogs, newBlog]);
-      reset();
+  const allTags = new Set<string>();
+  data?.forEach((blog: any) => {
+    if (blog.tags) {
+      blog.tags.split(',').forEach((tag: string) => {
+        allTags.add(tag.trim());
+      });
     }
-  };
-
-  const deleteBlog = async (id: number) => {
-    const response = await fetch(`http://localhost:8000/${id}/delete/`, {
-      method: 'DELETE',
-    });
-
-    if (response.ok) {
-      setBlogs(blogs.filter((blog) => blog.id !== id));
-    }
-  };
+  });
 
   return (
-    <div className='flex flex-col items-center min-h-screen py-10 bg-gray-100 text-gray-800'>
-      <main className='w-full max-w-md bg-white p-6 rounded-xl shadow-md'>
-        <h1 className='text-2xl font-bold mb-4 text-center'>Блог</h1>
+    <div className='flex flex-col gap-5'>
+      <FeaturedBlogs />
+      <main>
+        <div className='container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8'>
+          <div className='lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6'>
+            {data?.map((blog: any) => (
+              <div key={blog.id} className='bg-white rounded-xl shadow p-4'>
+                <img
+                  src={blog.preview || '/default-blog.png'}
+                  alt={blog.title}
+                  className='rounded-lg mb-3'
+                />
+                <Link
+                  href={`/blogs/${blog.id}`}
+                  className='font-bold text-lg mb-2'
+                >
+                  {blog.title}
+                </Link>
+                <p className='text-sm text-gray-600 mb-2'>{blog.description}</p>
+                <div className='flex flex-wrap gap-2'>
+                  {blog.tags && blog.tags.trim() && (
+                    <div className='flex flex-wrap gap-2'>
+                      {blog.tags
+                        .split(',')
+                        .map((tag: string, index: number) => (
+                          <span
+                            key={index}
+                            className='px-3 py-1 text-sm border border-purple-500 text-purple-500 rounded-full'
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
 
-        <form
-          onSubmit={handleSubmit(addBlog)}
-          className='mb-4 flex flex-col gap-2'
-        >
-          <input
-            {...register('title', { required: true })}
-            type='text'
-            className='w-full p-2 border rounded-md'
-            placeholder='Введите заголовок'
-          />
-          <textarea
-            {...register('content', { required: true })}
-            className='w-full p-2 border rounded-md h-24 resize-none'
-            placeholder='Введите содержание'
-          />
-          <button
-            type='submit'
-            className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600'
-          >
-            Добавить
-          </button>
-        </form>
-
-        <ul className='space-y-2'>
-          {blogs.map((blog) => (
-            <li key={blog.id} className='p-4 bg-gray-200 rounded-md'>
-              <h2 className='font-bold text-lg'>{blog.title}</h2>
-              <p className='text-gray-600'>{blog.content}</p>
-              <button
-                onClick={() => deleteBlog(blog.id)}
-                className='mt-2 px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600'
-              >
-                Удалить
-              </button>
-            </li>
-          ))}
-        </ul>
+          <aside className='space-y-8'>
+            <div className='bg-white p-4 rounded-xl shadow'>
+              <h3 className='font-semibold text-2xl mb-4.5'>Теги</h3>
+              <div className='flex flex-wrap gap-2'>
+                {allTags.size > 0 ? (
+                  <div className='flex flex-wrap gap-2'>
+                    {[...allTags].map((tag, i) => (
+                      <span
+                        key={i}
+                        className='px-3 py-1 text-sm border border-purple-500 text-purple-500 rounded-full'
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-gray-600'>Немає тегів для відображення</p>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
       </main>
     </div>
   );

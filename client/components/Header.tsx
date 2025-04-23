@@ -2,13 +2,32 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import Navigation from './Navigation';
 import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/stores/useAuthStore';
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
+  const router = useRouter();
   const pathname = usePathname();
+  const { isAuthenticated, login } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
 
-  const isCreateBlogPage = pathname === '/create-blog';
-  const isBlogDetailPage = pathname.startsWith('/blogs/');
+  const isNotRenderedPath =
+    pathname === '/blogs/create' ||
+    pathname === '/auth/login' ||
+    pathname === '/auth/register';
+
+  useEffect(() => {
+    const token = Cookies.get('access');
+    if (token) {
+      login(token);
+    }
+
+    setMounted(true);
+  }, [login]);
 
   return (
     <header
@@ -25,7 +44,7 @@ const Header = () => {
           </Link>
 
           <div className='flex gap-5'>
-            {!isCreateBlogPage && (
+            {!isNotRenderedPath && (
               <Link
                 href='/blogs/create'
                 className='border-2 border-border rounded-[60px] py-2.5 px-5'
@@ -34,20 +53,28 @@ const Header = () => {
               </Link>
             )}
 
-            <button className='cursor-pointer rounded-[60px] py-2.5 px-5 shadow-[0_9px_19px_0_rgba(0,0,0,0.15)] bg-[rgba(255,255,255,0.06)]'>
-              Увійти
-            </button>
+            {mounted && (
+              <button
+                onClick={() => {
+                  if (isAuthenticated) {
+                    useAuthStore.getState().logout();
+                  } else {
+                    router.push('/auth/login');
+                  }
+                }}
+                className={`cursor-pointer flex items-center rounded-[60px] py-2.5 px-5 ${
+                  isAuthenticated
+                    ? 'bg-accent text-white'
+                    : 'shadow-[0_9px_19px_0_rgba(0,0,0,0.15)] bg-[rgba(255,255,255,0.06)]'
+                }`}
+              >
+                {isAuthenticated ? 'Вийти' : 'Увійти'}
+              </button>
+            )}
           </div>
         </div>
 
-        <nav className='mt-5.5'>
-          <Link href='/'>Головна</Link>
-
-          {isCreateBlogPage && (
-            <span className='text-accent ml-2'>/ Створення блогу</span>
-          )}
-          {isBlogDetailPage && <span className='text-accent ml-2'>/ Блог</span>}
-        </nav>
+        <Navigation />
       </div>
     </header>
   );

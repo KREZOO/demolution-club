@@ -1,25 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
-
-interface BlogData {
-  title: string;
-  description: string;
-  content: string;
-  preview: string;
-  tags: string;
-  created_at: string;
-}
-
-const fetchBlog = async (id: string) => {
-  const response = await fetch(`http://localhost:8000/api/blogs/${id}/`);
-  if (!response.ok) {
-    throw new Error('Помилка при отриманні даних блогу');
-  }
-  return response.json();
-};
+import { useFetchBlog } from '@/hooks/useFetchBlog';
+import { useDeleteBlog } from '@/hooks/useDeleteBlog';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const BlogPage = () => {
   const params = useParams();
@@ -29,12 +14,19 @@ const BlogPage = () => {
       : Array.isArray(params.id)
       ? params.id[0]
       : '';
+  const { data, error, isLoading } = useFetchBlog(blogId);
 
-  const { data, error, isLoading } = useQuery<BlogData, Error>({
-    queryKey: ['blog', blogId],
-    queryFn: () => fetchBlog(blogId),
-    enabled: !!blogId,
-  });
+  const { mutate: deleteBlog } = useDeleteBlog();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    try {
+      await deleteBlog(blogId);
+      router.push('/');
+    } catch (error) {
+      console.error('Ошибка при удалении блога:', error);
+    }
+  };
 
   if (isLoading) return <p>Завантаження...</p>;
   if (error) return <p>Помилка: {error.message}</p>;
@@ -50,10 +42,21 @@ const BlogPage = () => {
   const tags = data.tags ? data.tags.split(',') : [];
 
   return (
-    <div className='max-w-7xl mx-auto p-8 font-rubik'>
-      <img src={data.preview} alt={data.title} className='mb-4 mx-auto' />
-      <h1 className='text-3xl font-semibold mb-2.5'>{data.title}</h1>
+    <div
+      className='max-w-7xl mx-auto p-8 font-rubik'
+      style={{ whiteSpace: 'pre-line' }}
+    >
+      <img
+        src={data.preview}
+        alt={data.title}
+        className='mb-4 mx-auto max-h-[500px]'
+      />
+      <h1 className='text-3xl font-semibold mb-2.5 text-center'>
+        {data.title}
+      </h1>
       <div className='text-lg text-justify'>{data.content}</div>
+
+      <div className='text-sm mt-4 font-bold'>Автор: {data.author}</div>
       <div className='text-sm mt-4 font-bold'>Створено: {formattedDate}</div>
       {tags.length > 0 && (
         <div className='mt-4 flex gap-2.5'>
@@ -71,11 +74,20 @@ const BlogPage = () => {
         </div>
       )}
 
-      <Link href={`/blogs/${blogId}/edit`}>
-        <button className='mt-4 px-4 py-2 bg-purple-500 text-white rounded-md cursor-pointer hover:bg-purple-600'>
-          Редагувати
+      <div className='mt-4 flex gap-4'>
+        <Link href={`/blogs/${blogId}/edit`}>
+          <button className='px-4 py-2 bg-purple-500 text-white rounded-md cursor-pointer hover:bg-purple-600'>
+            Редагувати
+          </button>
+        </Link>
+
+        <button
+          onClick={handleDelete}
+          className='px-4 py-2 bg-red-500 text-white rounded-md cursor-pointer hover:bg-red-600'
+        >
+          Видалити
         </button>
-      </Link>
+      </div>
     </div>
   );
 };

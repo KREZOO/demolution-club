@@ -44,15 +44,16 @@ export default function Home() {
           <div className='lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6'>
             {data?.map((blog: any) => (
               <div key={blog.id} className='bg-white rounded-xl shadow p-4'>
-                <img
-                  src={blog.preview || '/default-blog.png'}
-                  alt={blog.title}
-                  className='rounded-lg mb-3'
-                />
                 <Link
                   href={`/blogs/${blog.id}`}
                   className='font-bold text-lg mb-2'
                 >
+                  <img
+                    src={blog.preview || '/default-blog.png'}
+                    alt={blog.title}
+                    className='rounded-lg mb-3'
+                  />
+
                   {blog.title}
                 </Link>
                 <p className='text-sm text-gray-600 mb-2'>{blog.description}</p>

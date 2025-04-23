@@ -1,8 +1,9 @@
 'use client';
 
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useCreateBlog } from '@/hooks/useCreateBlog';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface IFormInput {
   title: string;
@@ -16,58 +17,27 @@ const CreateBlogForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-    control,
   } = useForm<IFormInput>();
+
   const [loading, setLoading] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const mutation = useMutation({
-    mutationFn: async (data: IFormInput) => {
-      const response = await fetch('http://localhost:8000/api/blogs/create/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Помилка при створенні блогу');
-      }
-
-      return response.json();
-    },
-    onMutate: () => {
-      setLoading(true);
-    },
-
-    onError: (error: any) => {
-      console.error('Помилка при створенні блогу:', error);
-
-      setLoading(false);
-    },
-
-    onSuccess: (result) => {
-      alert('Блог успішно створений: ' + JSON.stringify(result));
-      setLoading(false);
-      if (isClient) {
-        window.location.href = '/';
-      }
-    },
-  });
+  const { mutate: createBlog } = useCreateBlog();
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    if (!data.preview) {
-      data.preview = 'http://localhost:3000/default-blog.png';
-    }
+    setLoading(true);
 
-    mutation.mutate(data);
+    createBlog(data, {
+      onSuccess: () => {
+        router.push('/');
+      },
+      onError: (err: any) => {
+        console.error('Помилка при створенні блогу:', err);
+        alert('Щось пішло не так при створенні блогу');
+        setLoading(false);
+      },
+    });
   };
 
   return (
@@ -90,11 +60,11 @@ const CreateBlogForm: React.FC = () => {
           <input
             id='title'
             type='text'
-            className='mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
             {...register('title', { required: "Назва обов'язкова" })}
+            className='mt-1 block w-full p-3 border rounded-md'
           />
           {errors.title && (
-            <p className='text-red-500 text-lg mt-1'>{errors.title.message}</p>
+            <p className='text-red-500'>{errors.title.message}</p>
           )}
         </div>
 
@@ -107,14 +77,12 @@ const CreateBlogForm: React.FC = () => {
           </label>
           <textarea
             id='description'
-            className='mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
             rows={4}
             {...register('description', { required: "Опис обов'язковий" })}
+            className='mt-1 block w-full p-3 border rounded-md'
           />
           {errors.description && (
-            <p className='text-red-500 text-lg mt-1'>
-              {errors.description.message}
-            </p>
+            <p className='text-red-500'>{errors.description.message}</p>
           )}
         </div>
 
@@ -128,29 +96,27 @@ const CreateBlogForm: React.FC = () => {
           <input
             id='preview'
             type='text'
-            className='mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
             placeholder='Введіть посилання на зображення'
             {...register('preview')}
+            className='mt-1 block w-full p-3 border rounded-md'
           />
         </div>
 
         <div>
           <label
             htmlFor='content'
-            className='block text-lg font-medium text-gray-700 '
+            className='block text-lg font-medium text-gray-700'
           >
             Контент блогу
           </label>
           <textarea
             id='content'
-            className='mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
             rows={6}
             {...register('content', { required: "Контент обов'язковий" })}
+            className='mt-1 block w-full p-3 border rounded-md'
           />
           {errors.content && (
-            <p className='text-red-500 text-lg mt-1'>
-              {errors.content.message}
-            </p>
+            <p className='text-red-500'>{errors.content.message}</p>
           )}
         </div>
 
@@ -164,16 +130,16 @@ const CreateBlogForm: React.FC = () => {
           <input
             id='tags'
             type='text'
-            className='mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
             placeholder='Введіть теги через кому'
             {...register('tags')}
+            className='mt-1 block w-full p-3 border rounded-md'
           />
         </div>
 
         <div>
           <button
             type='submit'
-            className='w-full py-3 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600'
+            className='w-full py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600'
             disabled={loading}
           >
             {loading ? 'Створення...' : 'Створити'}

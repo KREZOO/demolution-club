@@ -3,6 +3,7 @@ import Cookies from 'js-cookie';
 
 const api = axios.create({
   baseURL: 'https://demolution-club.onrender.com/api',
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {

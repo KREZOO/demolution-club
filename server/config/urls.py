@@ -8,5 +8,5 @@ def index(request):
 urlpatterns = [
     path("", index),
     path("api/auth/", include("accounts.urls")),
-    path("api/blog/", include("blog.urls")),
+    path("api/blogs/", include("blog.urls")),
 ]

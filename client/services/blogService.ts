@@ -28,7 +28,7 @@ export interface BlogData {
 
 export const createBlog = async (data: CreateBlogInputData) => {
   if (!data.preview) {
-    data.preview = 'http://localhost:3000/default-blog.png';
+    data.preview = 'https://demolution-club.onrender.com/default-blog.png';
   }
 
   try {

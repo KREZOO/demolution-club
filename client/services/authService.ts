@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/auth';
+const API_URL = 'https://demolution-club.onrender.com/api/auth';
 
 export interface LoginData {
   username: string;

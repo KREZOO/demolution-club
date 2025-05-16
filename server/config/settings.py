@@ -12,7 +12,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['demolution-club.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,18 +29,19 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
+    "https://demolution-club.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]

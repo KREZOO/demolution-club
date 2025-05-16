@@ -41,6 +41,8 @@ MIDDLEWARE = [
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
+    "https://demolution-club-ev6z9dtfo-krezoos-projects.vercel.app",
+    "https://demolution-club.vercel.app",
     "https://demolution-club.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",

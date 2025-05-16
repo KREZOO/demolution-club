@@ -1,4 +1,3 @@
-// stores/useAuthStore.ts
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 
@@ -13,7 +12,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: !!Cookies.get('access'),
   token: Cookies.get('access') || null,
   login: (token: string) => {
-    Cookies.set('access', token, { expires: 7 }); // сохраняем токен на 7 дней
+    Cookies.set('access', token, { expires: 7 });
     set({ isAuthenticated: true, token });
   },
   logout: () => {

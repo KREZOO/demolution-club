@@ -11,21 +11,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-
-interface BlogCard {
-  id: string;
-  title: string;
-  description: string;
-  preview: string;
-}
-
-const fetchRandomBlogs = async () => {
-  const response = await fetch('http://localhost:8000/api/blogs/random/');
-  if (!response.ok) {
-    throw new Error('Помилка при завантаженнi блогiв');
-  }
-  return response.json();
-};
+import { getRandomBlogs, BlogCard } from '@/services/blogService';
 
 export const FeaturedBlogs = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -36,7 +22,7 @@ export const FeaturedBlogs = () => {
     isError,
   } = useQuery<BlogCard[]>({
     queryKey: ['randomBlogs'],
-    queryFn: fetchRandomBlogs,
+    queryFn: getRandomBlogs,
   });
 
   const fadeInUp = {

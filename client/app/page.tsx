@@ -1,22 +1,15 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { getBlogs, type BlogData } from '@/services/blogService';
 import Link from 'next/link';
 
 import { FeaturedBlogs } from '@/components/FeaturedBlogs';
 
-const fetchBlogs = async () => {
-  const response = await fetch('http://localhost:8000/api/blogs/');
-  if (!response.ok) {
-    throw new Error('Помилка при завантаженні блогів');
-  }
-  return response.json();
-};
-
 export default function Home() {
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery<BlogData[], Error>({
     queryKey: ['blogs'],
-    queryFn: fetchBlogs,
+    queryFn: getBlogs,
   });
 
   if (isLoading) {

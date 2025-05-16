@@ -26,6 +26,44 @@ export interface BlogData {
   author: string;
 }
 
+export interface BlogCard {
+  id: string;
+  title: string;
+  description: string;
+  preview: string;
+}
+
+export const getBlogs = async (): Promise<BlogData[]> => {
+  const response = await api.get('/blogs/');
+  return response.data;
+};
+
+export const getBlog = async (id: string): Promise<BlogData> => {
+  try {
+    const response = await api.get(`/blogs/${id}/`);
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      'Помилка при отриманні даних блогу:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const getRandomBlogs = async (): Promise<BlogCard[]> => {
+  try {
+    const response = await api.get<BlogCard[]>('/blogs/random/');
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      'Помилка при отриманні випадкових блогів:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 export const createBlog = async (data: CreateBlogInputData) => {
   if (!data.preview) {
     data.preview = 'https://demolution-club.vercel.app/default-blog.png';
@@ -63,19 +101,6 @@ export const deleteBlog = async (id: string) => {
   } catch (error: any) {
     console.error(
       'Помилка при видаленні блогу:',
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-export const getBlog = async (id: string): Promise<BlogData> => {
-  try {
-    const response = await api.get(`/blogs/${id}/`);
-    return response.data;
-  } catch (error: any) {
-    console.error(
-      'Помилка при отриманні даних блогу:',
       error.response?.data || error.message
     );
     throw error;
